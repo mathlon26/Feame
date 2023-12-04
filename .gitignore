@@ -1,0 +1,3 @@
+App/phpTemplates/*.php
+App/Views/home/en/*.php
+App/Views/home/nl/*.php
