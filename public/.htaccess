@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteBase /public
+
+# Allow reading files
+Options +FollowSymLinks
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite URL to index.php and pass parameters as query string
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
