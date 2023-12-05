@@ -39,3 +39,12 @@ function arrChop($arr, $n)
 
     return $output;
 }
+
+function redirect($redirect)
+{
+    $config = new Config;
+    $string = strtolower("{$config->DOMAIN}{$config->PUBLIC_FOLDER}/{$redirect}");
+
+    header("Location: {$string}");
+    exit();
+}

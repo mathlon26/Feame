@@ -9,8 +9,9 @@ class App
 
     public function Start()
     {   
+        $config = new Config();
+        
         try {
-            $config = new Config();
             $controllers = $config->CONTROLLERS;
             foreach ($controllers as $item) {
                 $filePath = "{$config->CONTROLLER_PATH}/{$item}.php";
@@ -28,85 +29,110 @@ class App
             $defMethod = $config->METHOD_DEFAULT;
             $this->controller = new $defController;
             $this->method = $defMethod;
-            if ($request[0] == "/")
+            if ($config->DOWN === true)
             {
-                unset($request[0]);
-            }
-            else if (ucfirst($request[0]) == $defController)
-            {
-                unset($request[0]);
-                if(!isset($request[1]))
-                {
-                    $this->redirect("");
-                }
-                if (ucfirst($request[1]) == $defMethod)
-                {
-                    $redirect = "";
-                    if (isset($request[2]))
+                import("{$config->FEAME_PATH}/routing/Controller.php");
+                if (ucfirst($request[0]) == "Admin") {
+                    import("{$config->DEFAULTCONTROLLERS_PATH}/Admin.php");
+                    $this->controller = new Admin;
+                    $c = get_class($this->controller);
+                    $this->method = "Login";
+                    if ($request[1] == "login_submit")
                     {
-                        unset($request[1]);
-                        $redirect = implode('', $request);
-                        show([get_class($this->controller), $this->method]);
+                        $this->method = "Login_Submit";
                     }
-                    $this->redirect($redirect);
-                }
-                else if (method_exists($this->controller, ucfirst($request[1])))
-                {
-                    $redirect = $request[1];
-
-                    if (isset($request[2]))
-                    {
-                        $redirect = implode('/', $request);
-                    }
-                    $this->redirect($redirect);
+                    $request = [];
                 }
                 else
                 {
-                    throw new Exception('404');
+                    Controller::view($config->DOWN_VIEW);
                 }
             }
-            else if (in_array(ucfirst($request[0]), $controllers))
+            else
             {
-                $this->controller = new $request[0];
-                unset($request[0]);
-                if (isset($request[1]) && method_exists($this->controller, ucfirst($request[1])))
+
+                
+                if ($request[0] == "/")
                 {
+                    unset($request[0]);
+                }
+                else if (ucfirst($request[0]) == $defController)
+                {
+                    unset($request[0]);
+                    if(!isset($request[1]))
+                    {
+                        redirect("");
+                    }
                     if (ucfirst($request[1]) == $defMethod)
                     {
-                        $redirect = get_class($this->controller);
+                        $redirect = "";
                         if (isset($request[2]))
                         {
                             unset($request[1]);
+                            $redirect = implode('', $request);
+                            show([get_class($this->controller), $this->method]);
+                        }
+                        redirect($redirect);
+                    }
+                    else if (method_exists($this->controller, ucfirst($request[1])))
+                    {
+                        $redirect = $request[1];
+
+                        if (isset($request[2]))
+                        {
                             $redirect = implode('/', $request);
                         }
-                        $this->redirect($redirect);
+                        redirect($redirect);
                     }
-                    $this->method = ucfirst($request[1]);
-                    unset($request[1]);
-                }
-                else
-                {
-                    throw new Exception('404');
-                }
-            }
-            else if (method_exists($this->controller, ucfirst($request[0])))
-            {
-                if (ucfirst($request[0]) == $defMethod)
-                {
-                    unset($request[0]);
-                    $redirect = "";
-                    if (isset($request[1]))
+                    else
                     {
-                        $redirect = implode('', $request);
+                        throw new Exception('404');
                     }
-                    $this->redirect($redirect);
                 }
-                else
+                else if (in_array(ucfirst($request[0]), $controllers))
                 {
-                    $this->method = ucfirst($request[0]);
+                    $this->controller = new $request[0];
                     unset($request[0]);
+                    if (isset($request[1]) && method_exists($this->controller, ucfirst($request[1])))
+                    {
+                        if (ucfirst($request[1]) == $defMethod)
+                        {
+                            $redirect = get_class($this->controller);
+                            if (isset($request[2]))
+                            {
+                                unset($request[1]);
+                                $redirect = implode('/', $request);
+                            }
+                            redirect($redirect);
+                        }
+                        $this->method = ucfirst($request[1]);
+                        unset($request[1]);
+                    }
+                    else
+                    {
+                        throw new Exception('404');
+                    }
+                }
+                else if (method_exists($this->controller, ucfirst($request[0])))
+                {
+                    if (ucfirst($request[0]) == $defMethod)
+                    {
+                        unset($request[0]);
+                        $redirect = "";
+                        if (isset($request[1]))
+                        {
+                            $redirect = implode('', $request);
+                        }
+                        redirect($redirect);
+                    }
+                    else
+                    {
+                        $this->method = ucfirst($request[0]);
+                        unset($request[0]);
+                    }
                 }
             }
+            
             $params = array_values($request); // example: ["459", "ed84"] in the browser: https://domain.com/controller/method/459/ed84/
             $wildcards = "{$this->method}Wildcards"; // example: [":id", "?redirect"]
             $requiredQueries = [];
@@ -126,7 +152,7 @@ class App
                 show($par);
                 $redirect = "{$contr}/{$this->method}/{$par}";
                 show($redirect);
-                $this->redirect($redirect);
+                redirect($redirect);
             }
             
 
@@ -145,7 +171,6 @@ class App
 
             
             $params = ["Wildcards" => $requiredWildcards, "Queries" => $requiredQueries];
-
             call_user_func_array([$this->controller, $this->method], [$params]);
         }
         catch (Exception $e) {
@@ -153,14 +178,6 @@ class App
         }
     } 
 
-    public function redirect($redirect)
-    {
-        $config = new Config;
-        $string = strtolower("{$config->DOMAIN}{$config->PUBLIC_FOLDER}/{$redirect}");
-
-        header("Location: {$string}");
-        exit();
-    }
 
     private function handleException($exception)
     {

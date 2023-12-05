@@ -17,6 +17,8 @@ class Config
     public $CONTROLLER_PATH;
     public $TEMPLATE_PATH;
     public $DEFAULTCONTROLLERS_PATH;
+    public $DB_PATH;
+
 
     /*
         Individual Error view names
@@ -31,12 +33,16 @@ class Config
     public $METHOD_DEFAULT = "Index";
     public $CONTROLLERS;
     public $PUBLIC_FOLDER;
+    public $DOWN;
+
 
     public function __construct()
     {
         $this->ROOT = "C:/Users/mathi/.xamp/htdocs";
         $this->FEAME_PATH = "{$this->ROOT}/!Feame";
         $this->APP_PATH = "{$this->ROOT}/App";
+        $this->DOMAIN = "http://localhost";
+        $this->PUBLIC_FOLDER = "/public";
 
         /*
             Individual module path configuration
@@ -45,13 +51,14 @@ class Config
         $this->VIEW_PATH = "{$this->APP_PATH}/Views";
         $this->CONTROLLER_PATH = "{$this->APP_PATH}/Controllers";
         $this->DEFAULTCONTROLLERS_PATH = "{$this->FEAME_PATH}/defaultControllers";
-        $this->FOURZEROFOUR = "error/404";
-        $this->FOURZEROTHREE = "error/403";
-
         $this->TEMPLATE_PATH = "{$this->APP_PATH}/phpTemplates";
-        $this->DOMAIN = "http://localhost";
+        $this->DB_PATH = "{$this->FEAME_PATH}/database";
 
-        $this->PUBLIC_FOLDER = "/public";
+        $this->FOURZEROFOUR = "error/404"; // view
+        $this->FOURZEROTHREE = "error/403"; // view
+
+        $this->DOWN = false;
+        $this->DOWN_VIEW = "error/down";
         
         $this->CONTROLLERS = [
             "Home"

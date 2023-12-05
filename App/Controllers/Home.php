@@ -14,7 +14,7 @@ class Home extends Controller
     }
 
 
-    public $ContactWildcards = [":lang"];
+    public $ContactWildcards = [":lang", "?anchor"];
     public function Contact($data)
     {
         $data['title'] = "Contact";

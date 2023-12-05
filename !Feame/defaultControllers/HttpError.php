@@ -4,6 +4,6 @@ class HttpError
 {
     public static function Error($view, $params = [])
     {
-        Controller::view($view);
+        Controller::view($view, $params);
     }
 }
