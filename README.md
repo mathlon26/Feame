@@ -1,4 +1,4 @@
-# Feame PHP Framework
+# Feame PHP Framework (outdated)
 
 Feame is a lightweight PHP framework designed to provide structure and ease of development for web applications. This readme will guide you through the setup, configuration, and usage of the framework.
 
