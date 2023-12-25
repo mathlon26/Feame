@@ -42,6 +42,17 @@ class Controller extends App
 
     public static function view($view, $data = [])
     {
+        if (isset($data["private"]))
+        {
+            if ($data["private"])
+            {
+
+            }
+        }
+        $lang = parseLanguage($data);
+        $pathParts = explode('/', $view);
+        array_splice($pathParts, 1, 0, $lang);
+        $view = implode('/', $pathParts);
         $config = new Config();
         $viewPath = "{$config->VIEW_PATH}/{$view}.php";
         $variables = self::extract_file_variables($viewPath);

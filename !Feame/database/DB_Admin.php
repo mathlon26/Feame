@@ -10,7 +10,7 @@ class DB_Admin
         $this->logged_in = false;
         $config = new Config;
         import("{$config->DB_PATH}/DB.php");
-        $this->DB = new DB("dossier", "root", "","localhost");
+        $this->DB = new DB("uhasselt_admin", "root", "","localhost");
     }
 
     public function login($username, $password)

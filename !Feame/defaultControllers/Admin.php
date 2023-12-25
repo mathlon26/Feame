@@ -15,6 +15,7 @@ class Admin
     public $Login_SubmitWildcards = [];
     public function Login_Submit($data = [])
     {
+
         $config = new Config;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,10 +33,27 @@ class Admin
                 $_SESSION['username'] = $usernameff;
 
                 Controller::view("admin/dashboard", [$_SESSION]);
-                exit();
             } else {
-                redirect("admin/?error=Invalid username or password");
+                redirect("en/admin/?error=Invalid username or password");
             }
+        }
+    }
+
+    public $Logout_SubmitWildcards = [];
+    public function Logout_Submit($data = [])
+    {
+        $config = new Config;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            session_start();
+            import("{$config->DB_PATH}/DB_Admin.php");
+            $DB = new DB_Admin;
+            $DB->logout();
+            
+            show("ffff");
+            redirect("admin");
+        } else {
+            redirect("en/admin/?error=Invalid request");
         }
     }
 }

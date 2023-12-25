@@ -10,16 +10,18 @@ class DB
     public $Manipulate;
     public $Retrieve;
     public $Util;
+    public $connection;
+
 
     public function __construct($DB_NAME = null, $DB_USER = null, $DB_PASSWORD = null, $DB_HOST = null) {
         $this->DB_NAME = $DB_NAME;
         $this->DB_USER = $DB_USER;
         $this->DB_PASSWORD = $DB_PASSWORD;
         $this->DB_HOST = $DB_HOST;
-        $this->Fetch = new Fetch;
-        $this->Manipulate = new Manipulate;
-        $this->Retrieve = new Retrieve;
-        $this->Util = new Util;
+        $this->Fetch = new Fetch($this);
+        $this->Manipulate = new Manipulate($this);
+        $this->Retrieve = new Retrieve($this);
+        $this->Util = new Util($this);
 
 
 
@@ -89,6 +91,11 @@ class DB
 
 class Fetch
 {
+    public $DB;
+    public function __construct($DB)
+    {
+        $this->DB = $DB;
+    }
     public function id($table, $id)
     {
         $sql = "SELECT * FROM {$table} WHERE id = :id";
@@ -104,10 +111,22 @@ class Fetch
         $statement = $this->DB->query($sql);
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function columns($table)
+    {
+        $sql = "SHOW COLUMNS FROM {$table}";
+        $statement = $this->DB->query($sql);
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 
 class Manipulate
 {
+    public $DB;
+    public function __construct($DB)
+    {
+        $this->DB = $DB;
+    }
     public function insert($table, $data)
     {
         $sql = "INSERT INTO {$table} (column1, column2) VALUES (:value1, :value2)";
@@ -138,6 +157,11 @@ class Manipulate
 
 class Retrieve
 {
+    public $DB;
+    public function __construct($DB)
+    {
+        $this->DB = $DB;
+    }
     public function select($table, $columns, $conditions = [])
     {
         $sql = "SELECT " . implode(', ', $columns) . " FROM {$table}";
@@ -161,10 +185,16 @@ class Retrieve
         $statement = $this->DB->query($sql);
         return $statement->fetchColumn();
     }
+
 }
 
 class Util
 {
+    public $DB;
+    public function __construct($DB)
+    {
+        $this->DB = $DB;
+    }
     public function getLastInsertedId()
     {
         return $this->DB->connection->lastInsertId();

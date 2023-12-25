@@ -1,7 +1,7 @@
 <?php
 require_once "DoNotTouch/exceptions.php";
 require_once "DoNotTouch/functions.php";
-$BASE_DIR = "C:/Users/mathi/.xamp/htdocs/!Feame";
+$BASE_DIR = "D:/XAMPP/htdocs/!Feame";
 
 import("{$BASE_DIR}/config.php");
 $config = new Config();

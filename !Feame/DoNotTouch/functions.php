@@ -48,3 +48,9 @@ function redirect($redirect)
     header("Location: {$string}");
     exit();
 }
+
+function parseLanguage($data)
+{
+    $lang = isset($data['Wildcards']['lang']) ? strtolower($data['Wildcards']['lang']) : "";
+    return $lang;
+}

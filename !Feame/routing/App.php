@@ -17,68 +17,110 @@ class App
                 $filePath = "{$config->CONTROLLER_PATH}/{$item}.php";
                 import($filePath);
             }
+            
             $params = [];
-            $url = [0 => "/"];
+            $url = [0 => ""];
             if(array_key_exists('url', $_REQUEST))
             {
                 $url = explode('/', $_REQUEST['url']);
             }
-
             $request = $url;
             $defController = $config->CONTROLLER_DEFAULT;
             $defMethod = $config->METHOD_DEFAULT;
             $this->controller = new $defController;
             $this->method = $defMethod;
-            if ($config->DOWN === true)
+            if (!empty($request) && $request[count($request) - 1] === '') {
+                // Remove the last element
+                array_pop($request);
+            }
+            if ($config->DOWN === true && in_array(strtolower($request[0]), $config->LANGUAGES))
             {
                 import("{$config->FEAME_PATH}/routing/Controller.php");
-                if (ucfirst($request[0]) == "Admin") {
-                    import("{$config->DEFAULTCONTROLLERS_PATH}/Admin.php");
-                    $this->controller = new Admin;
-                    $c = get_class($this->controller);
-                    $this->method = "Login";
-                    if ($request[1] == "login_submit")
-                    {
-                        $this->method = "Login_Submit";
+                if (isset($request[1])) {
+                    if (ucfirst($request[1]) == "Admin") {
+                        import("{$config->DEFAULTCONTROLLERS_PATH}/Admin.php");
+                        $this->controller = new Admin;
+                        $c = get_class($this->controller);
+                        $this->method = "Login";
+                        if (isset($request[2])) {
+                            redirect("en/admin");
+                        }
+                        $request = [];
                     }
-                    $request = [];
+                    else if ($request[1] == "login_submit")
+                    {
+                        import("{$config->DEFAULTCONTROLLERS_PATH}/Admin.php");
+                        $this->controller = new Admin;
+                        $c = get_class($this->controller);
+                        $this->method = "Login_Submit";
+                        $request = [];
+
+                    }
+                    else if ($request[1] == "logout_submit")
+                    {
+                        import("{$config->DEFAULTCONTROLLERS_PATH}/Admin.php");
+                        $this->controller = new Admin;
+                        $c = get_class($this->controller);
+                        $this->method = "Logout_Submit";
+                        $request = [];
+                    }
+                    else
+                    {
+                        Controller::view($config->DOWN_VIEW);
+                        exit();
+                    }
                 }
                 else
                 {
                     Controller::view($config->DOWN_VIEW);
+                    exit();
                 }
             }
             else
             {
-
                 
-                if ($request[0] == "/")
+                if (!in_array(strtolower($request[0]), $config->LANGUAGES))
                 {
-                    unset($request[0]);
+                    $redirect = [];
+                    if (strlen($request[0]) > 2) {
+                        $redirect = $request;
+        
+                    } else {
+                        $redirect = array_slice($request, 1);
+                    }
+                    $redirectString = implode('/', array_merge(['en'], $request));
+                    redirect($redirectString);
                 }
-                else if (ucfirst($request[0]) == $defController)
+                else if (!isset($request[1]) && in_array(strtolower($request[0]), $config->LANGUAGES))
+                {
+                    $this->controller = new $config->CONTROLLER_DEFAULT;
+                    $this->method = "Index";
+                    
+                }
+                else if (ucfirst($request[1]) == $defController)
                 {
                     unset($request[0]);
-                    if(!isset($request[1]))
+                    unset($request[1]);
+                    if(!isset($request[2]))
                     {
                         redirect("");
                     }
-                    if (ucfirst($request[1]) == $defMethod)
+                    if (ucfirst($request[2]) == $defMethod)
                     {
                         $redirect = "";
-                        if (isset($request[2]))
+                        if (isset($request[3]))
                         {
-                            unset($request[1]);
+                            unset($request[2]);
                             $redirect = implode('', $request);
                             show([get_class($this->controller), $this->method]);
                         }
                         redirect($redirect);
                     }
-                    else if (method_exists($this->controller, ucfirst($request[1])))
+                    else if (method_exists($this->controller, ucfirst($request[2])))
                     {
-                        $redirect = $request[1];
+                        $redirect = $request[2];
 
-                        if (isset($request[2]))
+                        if (isset($request[3]))
                         {
                             $redirect = implode('/', $request);
                         }
@@ -89,46 +131,49 @@ class App
                         throw new Exception('404');
                     }
                 }
-                else if (in_array(ucfirst($request[0]), $controllers))
+                else if (in_array(ucfirst($request[1]), $controllers))
                 {
-                    $this->controller = new $request[0];
-                    unset($request[0]);
-                    if (isset($request[1]) && method_exists($this->controller, ucfirst($request[1])))
+                    $this->controller = new $request[1];
+                    unset($request[1]);
+                    if (isset($request[2]) && method_exists($this->controller, ucfirst($request[2])))
                     {
-                        if (ucfirst($request[1]) == $defMethod)
+                        if (ucfirst($request[2]) == $defMethod)
                         {
                             $redirect = get_class($this->controller);
-                            if (isset($request[2]))
+                            if (isset($request[3]))
                             {
-                                unset($request[1]);
+                                unset($request[2]);
                                 $redirect = implode('/', $request);
                             }
                             redirect($redirect);
                         }
-                        $this->method = ucfirst($request[1]);
-                        unset($request[1]);
+                        $this->method = ucfirst($request[2]);
+                        unset($request[2]);
                     }
                     else
                     {
                         throw new Exception('404');
                     }
                 }
-                else if (method_exists($this->controller, ucfirst($request[0])))
+                else if (method_exists($this->controller, ucfirst($request[1])))
                 {
-                    if (ucfirst($request[0]) == $defMethod)
+                    
+                    if (ucfirst($request[1]) == $defMethod)
                     {
-                        unset($request[0]);
-                        $redirect = "";
-                        if (isset($request[1]))
+                        
+                        unset($request[1]);
+                        $redirect = $request[0];
+                        if (isset($request[2]))
                         {
-                            $redirect = implode('', $request);
+                            $redirect = implode('/', $request);
                         }
+                    
                         redirect($redirect);
                     }
                     else
                     {
-                        $this->method = ucfirst($request[0]);
-                        unset($request[0]);
+                        $this->method = ucfirst($request[1]);
+                        unset($request[1]);
                     }
                 }
             }
